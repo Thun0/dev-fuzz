@@ -19,4 +19,4 @@ def log_fatal(*args):
     print("FATAL: ", end="")
     print(*args)
     print("Terminated")
-    exit(1)
+    exit(-1)

@@ -1,0 +1,33 @@
+<domain type='kvm'>
+  <name>Sample1</name>
+  <memory unit='M'>2048</memory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+    <boot dev='hd'/>
+    <boot dev='cdrom'/>
+  </os>
+
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+      <source file='/home/thun/qemu/hda/test.img'/>
+      <driver name='qemu' type='qcow2'/>
+      <target dev='hda'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <source file='/home/thun/qemu/img/android-x86_64-default.iso'/>
+      <target dev='hdb' bus='ide'/>
+    </disk>
+    <interface type='bridge'>
+      <mac address='52:54:00:d8:65:c9'/>
+      <source bridge='virbr0'/>
+    </interface>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='vnc' port='-1' listen='127.0.0.1'/>
+  </devices>
+</domain>
