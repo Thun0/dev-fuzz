@@ -1,11 +1,11 @@
 import sys
 
-import settings
+from settings import config
 
 
 def log_info(*args):
-    if settings.verbose:
-        if settings.debug is not True:
+    if config["verbose"]:
+        if config["debug"] is not True:
             print("LOG: ", end="")
         print(*args)
 

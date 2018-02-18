@@ -3,8 +3,7 @@
 import argparse
 
 import libvirt
-import settings
-from logger import *
+from vm_manager.logger import *
 
 
 def parse_arguments():
@@ -15,18 +14,18 @@ def parse_arguments():
     parser.add_argument("-u", "--uri", help="hypervisor driver uri, default: qemu:///system")
     parser.add_argument("-v", "--verbose", help="verbose output", action="store_true")
     args = parser.parse_args()
-    if settings.debug:
-        settings.verbose = True
-    if settings.debug is not True and len(sys.argv) == 1:
+    if config["debug"]:
+        config["verbose"] = True
+    if config["debug"] is not True and len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     if args.verbose:
-        settings.verbose = True
+        config["verbose"] = True
     if args.uri:
-        settings.hypervisor_uri = args.uri
+        config["vm_manager"]["hypervisor_uri"] = args.uri
 
 
-def connect_hypervisor(uri=settings.hypervisor_uri):
+def connect_hypervisor(uri=config["vm_manager"]["hypervisor_uri"]):
     """Connects to hypervisor
 
     :param uri: URI to connect to
@@ -36,7 +35,7 @@ def connect_hypervisor(uri=settings.hypervisor_uri):
     if conn is None:
         log_error("Failed to connect")
         exit(1)
-    log_info("Libvirt connected to: " + settings.hypervisor_uri)
+    log_info("Libvirt connected to: " + config["vm_manager"]["hypervisor_uri"])
     return conn
 
 
