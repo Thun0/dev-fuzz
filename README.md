@@ -1,6 +1,6 @@
-##Driver fuzzer
+## Driver fuzzer
 
-###Modules
+### Modules
 
 Modules in progress:
 - generator
@@ -14,7 +14,7 @@ Modules to be created in the future:
 
 ---
 
-###Mutations
+### Mutations
 
 Mutations done:
 - randomize bytes
