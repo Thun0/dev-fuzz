@@ -9,5 +9,14 @@ config = {
 
     "mutator": {
         "max_mutated_bytes": 0.01
+    },
+
+    "receiver": {
+        "port" : 31337
+    },
+
+    "corpus": {
+        "dir_path" : "corpus/"
     }
+
 }
