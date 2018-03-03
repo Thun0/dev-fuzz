@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 
 import argparse
-
 import libvirt
-from vm_manager.logger import *
+import settings
+import sys
+
+from utils.logger import Logger
+
+log = Logger()
 
 
 def parse_arguments():
@@ -14,18 +18,18 @@ def parse_arguments():
     parser.add_argument("-u", "--uri", help="hypervisor driver uri, default: qemu:///system")
     parser.add_argument("-v", "--verbose", help="verbose output", action="store_true")
     args = parser.parse_args()
-    if config["debug"]:
-        config["verbose"] = True
-    if config["debug"] is not True and len(sys.argv) == 1:
+    if settings.config["debug"]:
+        settings.config["verbose"] = True
+    if settings.config["debug"] is not True and len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     if args.verbose:
-        config["verbose"] = True
+        settings.config["verbose"] = True
     if args.uri:
-        config["vm_manager"]["hypervisor_uri"] = args.uri
+        settings.config["vm_manager"]["hypervisor_uri"] = args.uri
 
 
-def connect_hypervisor(uri=config["vm_manager"]["hypervisor_uri"]):
+def connect_hypervisor(uri=settings.config["vm_manager"]["hypervisor_uri"]):
     """Connects to hypervisor
 
     :param uri: URI to connect to
@@ -33,9 +37,9 @@ def connect_hypervisor(uri=config["vm_manager"]["hypervisor_uri"]):
     """
     conn = libvirt.open(uri)
     if conn is None:
-        log_error("Failed to connect")
+        log.e("Failed to connect")
         exit(1)
-    log_info("Libvirt connected to: " + config["vm_manager"]["hypervisor_uri"])
+    log.i("Libvirt connected to: " + settings.config["vm_manager"]["hypervisor_uri"])
     return conn
 
 
@@ -47,15 +51,15 @@ def run_temporary_domain_from_xml_file(connection, filepath):
     :return: domain object for success, None otherwise.
 
     """
-    log_info("Running temporary domain from file: " + filepath)
+    log.i("Running temporary domain from file: " + filepath)
     file = open(filepath, "r")
     xml = file.read()
     file.close()
     domain = connection.createXML(xml)
     if domain is None:
-        log_error("Unable to create domain")
+        log.e("Unable to create domain")
         return None
-    log_info("New domain is running")
+    log.i("New domain is running")
     return domain
 
 
@@ -68,7 +72,7 @@ def print_domains(connection, flags=0):
     """
     domains = connection.listAllDomains(flags)
     if domains is None:
-        log_fatal("Failed to get a list of domains")
+        log.f("Failed to get a list of domains")
     if len(domains) == 0:
         print("No domains found!")
     else:
@@ -85,15 +89,15 @@ def create_domain_from_xml_file(connection, filepath):
     :return: domain object for success, None otherwise.
 
     """
-    log_info("Creating new domain from file: " + filepath)
+    log.i("Creating new domain from file: " + filepath)
     file = open(filepath, "r")
     xml = file.read()
     file.close()
     domain = connection.defineXML(xml)
     if domain is None:
-        log_error("Unable to create domain")
+        log.e("Unable to create domain")
         return None
-    log_info("New domain created")
+    log.i("New domain created")
     return domain
 
 
@@ -105,10 +109,10 @@ def run_domain(domain):
 
     """
     if domain.create(domain) < 0:
-        log_error("Unable to boot new domain")
+        log.e("Unable to boot new domain")
         return -1
     else:
-        log_info("New domain is up and running!")
+        log.i("New domain is up and running!")
         return 1
 
 
@@ -122,9 +126,9 @@ def main():
 def test1(connection):
     pools = connection.listAllStoragePools(0)
     if pools is None:
-        log_fatal("Failed to locate any StoragePool objects.")
+        log.f("Failed to locate any StoragePool objects.")
     for pool in pools:
-        log_info("Pool: " + pool.name())
+        log.i("Pool: " + pool.name())
     print_domains(connection)
     domain = create_domain_from_xml_file(connection, "/home/thun/inzynierka/src/xml_domains/sample1.xml")
     run_domain(domain)

@@ -1,21 +1,33 @@
 import socket
 import settings
-import threading
+import struct
+
 
 class Receiver:
+    """Receiver class which runs on guest, receives data and sends it to driver
+    """
 
-    connections = []
+    sock = None
 
-    def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((socket.gethostname(), settings.config["receiver"]["port"]))
-        self.sock.listen(5)
-        self.thr = threading.Thread(target=self.thread_function())
-        self.thr.start()
+    def __init__(self, port=settings.config["receiver"]["port"]):
+        self.listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.listen_sock.bind(("localhost", port))
+        self.listen_sock.listen(5)
+        self.sock, addr = self.listen_sock.accept()
+        print("Connection from " + addr[0])
 
-    def thread_function(self):
+    def run(self):
         while True:
-            conn, addr = self.sock.accept()
-            self.connections.append(conn)
-            print("Connection from " + addr)
-            # FIXME: rest of the function
+            pass
+            # FIXME: receive data and send to driver
+
+    def receive_data(self):
+        length = struct.unpack('i', self.sock.recv(4))[0]
+        print(length)
+        return self.sock.recv(length)
+
+    def dispose(self):
+        self.listen_sock.close()
+
+    def test_receive(self):
+        return self.receive_data()
