@@ -1,12 +1,17 @@
-from vm_manager.manager import Manager
+import socket
+from sender.message import Message, MessageType
+import time
 
 
 def test1():
-    m = Manager()
-    m.connect_to_machine("localhost", 1234)
-    data = "hello network"
-    m.send_data_to(data.encode(), 0)
-    m.dispose()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(("localhost", 42501))
+    msg = Message(MessageType.DEV_PATH, '/dev/null')
+    data = msg.pack()
+    print(data)
+    s.send(data)
+    time.sleep(1)
+    s.close()
 
 
 test1()

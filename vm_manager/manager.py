@@ -1,6 +1,7 @@
 import socket
 import struct
 
+
 class Manager:
 
     connections = []
@@ -13,10 +14,10 @@ class Manager:
             s.connect((addr, port))
             self.connections.append(s)
 
-    def send_data_to(self, data, id):
+    def send_data_to(self, data, connid):
         header = struct.pack('i', len(data))
-        self.connections[id].send(header)
-        self.connections[id].send(data)
+        self.connections[connid].send(header)
+        self.connections[connid].send(data)
 
     def dispose(self):
         for s in self.connections:

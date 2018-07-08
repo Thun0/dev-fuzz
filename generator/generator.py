@@ -6,7 +6,7 @@ class Generator:
     def generate_from_template(self, filepath):
         with open(filepath) as file:
             template = file.read()
-            self.parse(template)
+            self.parse_template(template)
 
     def parse_template(self, template):
         pass
