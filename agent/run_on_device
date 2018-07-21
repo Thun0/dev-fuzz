@@ -1,4 +1,4 @@
 #!/bin/bash
-adb push agent /data/local/tmp
+adb push bin/agent /data/local/tmp
 adb shell chmod +x /data/local/tmp
 adb shell /data/local/tmp/agent

@@ -10,6 +10,10 @@ def test1():
     data = msg.pack()
     print(data)
     s.send(data)
+    msg = Message(MessageType.IOCTL, 13371337, 'ablablablablabala'.encode());
+    data = msg.pack()
+    print(data)
+    s.send(data)
     time.sleep(1)
     s.close()
 

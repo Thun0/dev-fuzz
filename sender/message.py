@@ -23,8 +23,10 @@ class Message:
 
     def pack(self):
         if self.type == MessageType.DEV_PATH:
-            return struct.pack('ii{}s'.format(len(self.path)), MessageType.DEV_PATH.value, len(self.path), self.path.encode())
+            print('Packing dev_path msg')
+            return struct.pack('=ii{}s'.format(len(self.path)), self.type.value, len(self.path), self.path.encode())
         elif self.type == MessageType.IOCTL:
-            raise NotImplementedError('This type is not supported')
+            print('Packing ioctl msg')
+            return struct.pack('=iQi{}s'.format(len(self.args)), self.type.value, self.req, len(self.args), self.args)
         else:
             raise NotImplementedError('This type is not supported')
