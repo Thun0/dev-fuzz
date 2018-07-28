@@ -17,6 +17,9 @@ config = {
 
     "corpus": {
         "dir_path" : "corpus/"
-    }
+    },
 
+    "projects_dir": "projects/",
+    "project": "",
+    "adb_port": 5037
 }

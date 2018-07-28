@@ -11,7 +11,7 @@ class Corpus:
         if dir_path is None:
             dir_path = settings.config["corpus"]["dir_path"]
         for file in listdir(dir_path):
-            self.inputs.append(file.read())
+            self.inputs.append(file)
 
     def add_case(self, case):
         self.inputs.append(case)
