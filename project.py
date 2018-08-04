@@ -1,6 +1,9 @@
 import configparser
-from android import device
+from fuzzer import Fuzzer
 from android import utils
+import settings
+from utils import terminal
+
 
 class Project:
 
@@ -8,12 +11,16 @@ class Project:
         self.name = name
         self.filepath = ''
         self.devices = []
+        self.devpath = None
+        self.corpuspath = None
+        self.fuzzers = []
+        self.error = None
 
     def create(self, path):
         self.filepath = path
 
     def load(self, path):
-        pass
+        self.filepath = path
 
     def save(self):
         config = configparser.ConfigParser()
@@ -22,14 +29,25 @@ class Project:
 
     def main_menu(self):
         while True:
-            print('\033[H\033[J')
+            terminal.clear()
+            if self.error:
+                terminal.red()
+                print(self.error)
+                terminal.end_color()
+                self.error = None
             print('Projekt {}'.format(self.name))
             print('--------------------')
             print('1. Rozpocznij test')
             print('--------------------')
-            print('2. Wybierz sterownik')
-            print('3. Wybierz korpus')
-            print('4. Wybierz urzadzenia')
+            if self.devpath:
+                print('2. Wybierz sterownik (wybrano {})'.format(self.devpath))
+            else:
+                print('2. Wybierz sterownik')
+            if self.corpuspath:
+                print('3. Wybierz korpus (wybrano {})'.format(self.corpuspath))
+            else:
+                print('3. Wybierz korpus')
+            print('4. Wybierz urzadzenia (wybrano {} urządzen)'.format(len(self.devices)))
             print('--------------------')
             print('5. Zapisz projekt')
             print('0. Wyjscie')
@@ -37,12 +55,30 @@ class Project:
             choice = int(input('Wybor: '))
             if choice == 0:
                 break
+            elif choice == 1:
+                self.start_test()
+            elif choice == 2:
+                self.choose_driver()
             elif choice == 4:
                 self.choose_devices()
+
+    def start_test(self):
+        if len(self.devices) == 0:
+            self.error = 'Wybierz urzadzenia do testu!'
+            return
+        port = settings.config['devices_start_port']
+        for d in self.devices:
+            d.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
+            self.fuzzers.append(Fuzzer(d, port))
+            port += 1
+
+    def choose_driver(self):
+        self.devpath = input('Podaj sciezke do sterownika: ')
 
     def choose_devices(self):
         all_devices = utils.get_devices()
         while True:
+            terminal.clear()
             if len(all_devices) == 0:
                 print('Brak urzadzen')
                 print('--------------------')
@@ -57,19 +93,21 @@ class Project:
                 print('--------------------')
                 print('1-{}. Zaznacz/odznacz urzadzenie do przeprowadzenia testu'.format(len(all_devices)))
             print('a. Odswiez liste')
-            print('')
             print('0. Powrot')
             print('--------------------')
             choice = input('Wybor: ')
             if choice == 'a':
                 all_devices = utils.get_devices()
                 continue
-            choice = int(choice)
-            if choice == 0:
-                break
-            elif 0 < choice <= len(all_devices):
-                choice -= 1
-                if all_devices[choice] in self.devices:
-                    self.devices.remove(all_devices[choice])
-                else:
-                    self.devices.append(all_devices[choice])
+            try:
+                choice = int(choice)
+                if choice == 0:
+                    break
+                elif 0 < choice <= len(all_devices):
+                    choice -= 1
+                    if all_devices[choice] in self.devices:
+                        self.devices.remove(all_devices[choice])
+                    else:
+                        self.devices.append(all_devices[choice])
+            except ValueError:
+                pass

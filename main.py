@@ -36,11 +36,11 @@ def settings_menu():
 
 def create_new_project():
     while True:
+        # TODO: filter to remove path traversal
         project_name = input('Podaj nazwe projektu: ')
         p = Path().absolute().parents[0]
         p /= settings.config['projects_dir']
-        p /= project_name
-        p /= '.afz'
+        p /= (project_name+'.afz')
         if p.exists():
             print('Projekt o podanej nazwie juz istnieje!')
         else:
@@ -52,7 +52,27 @@ def create_new_project():
 
 
 def load_project():
-    pass
+    while True:
+        project_name = input('Podaj nazwe lub sciezke projektu (0 - powrót do menu): ')
+        try:
+            if int(project_name) == 0:
+                break
+        except ValueError:
+            pass
+        if Path(project_name).exists():
+            project = Project(project_name.split('/')[-1])
+            project.load(project_name)
+        p = Path().absolute().parents[0]
+        p /= settings.config['projects_dir']
+        p /= (project_name + '.afz')
+        if p.exists():
+            project = Project(project_name)
+            project.load(p)
+        else:
+            print('Projekt o podanej nazwie/sciezce nie istnieje!')
+            continue
+        project.main_menu()
+        break
 
 
 if __name__ == "__main__":

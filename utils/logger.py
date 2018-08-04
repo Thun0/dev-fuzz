@@ -1,6 +1,6 @@
 import sys
-
 from settings import config
+
 
 class Logger:
 
@@ -15,11 +15,9 @@ class Logger:
                 print("LOG: ", end="")
             print(*args)
 
-
     def e(self, *args):
         print("ERR: ", end="", file=sys.stderr)
         print(*args, file=sys.stderr)
-
 
     def f(self, *args):
         print("FATAL: ", end="")
