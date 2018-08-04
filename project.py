@@ -3,6 +3,7 @@ from fuzzer import Fuzzer
 from android import utils
 import settings
 from utils import terminal
+import threading
 
 
 class Project:
@@ -15,6 +16,7 @@ class Project:
         self.corpuspath = None
         self.fuzzers = []
         self.error = None
+        self.threads = []
 
     def create(self, path):
         self.filepath = path
@@ -67,10 +69,25 @@ class Project:
             self.error = 'Wybierz urzadzenia do testu!'
             return
         port = settings.config['devices_start_port']
+        print('Pushing agents')
         for d in self.devices:
             d.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
             self.fuzzers.append(Fuzzer(d, port))
             port += 1
+        for f in self.fuzzers:
+            t = threading.Thread(target=f.run, daemon=True)
+            self.threads.append(t)
+            t.start()
+        print('Fuzzing started!')
+        print('{} active threads'.format(threading.active_count()-1))
+        print('Press any key to stop testing...')
+        input()
+        print('Stopping..')
+        for f in self.fuzzers:
+            f.stop()
+        for t in self.threads:
+            t.join()
+        print('{} active threads'.format(threading.active_count()-1))
 
     def choose_driver(self):
         self.devpath = input('Podaj sciezke do sterownika: ')
