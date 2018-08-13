@@ -4,6 +4,7 @@ from android import utils
 import settings
 from utils import terminal
 import threading
+from pathlib import Path
 
 
 class Project:
@@ -20,14 +21,38 @@ class Project:
 
     def create(self, path):
         self.filepath = path
+        Path(self.filepath).touch(0o644)
+        self.corpuspath = '{}{}'.format(settings.config['corpuses_dir'], self.name)
+        p = Path().absolute().parents[0]
+        p /= Path(self.corpuspath)
+        if not p.exists():
+            p.mkdir(0o755)
+            p1 = p / 'ioctl'
+            p2 = p / 'write'
+            p3 = p / 'mmap'
+            p1.mkdir(0o755)
+            p2.mkdir(0o755)
+            p3.mkdir(0o755)
+        else:
+            print('ERR: Korpus juz istnieje')
 
     def load(self, path):
         self.filepath = path
+        config = configparser.ConfigParser()
+        config.read_file(open(self.filepath))
+        self.name = config['project']['name']
+        self.devpath = config['project']['devpath']
+        self.corpuspath = config['project']['corpuspath']
 
     def save(self):
         config = configparser.ConfigParser()
+        config['project'] = {}
+        config['project']['name'] = self.name
+        config['project']['devpath'] = self.devpath
+        config['project']['corpuspath'] = self.corpuspath
         with open(self.filepath, 'w') as conf_file:
             config.write(conf_file)
+        print('Projekt zostal zapisany!')
 
     def main_menu(self):
         while True:
@@ -39,7 +64,7 @@ class Project:
                 self.error = None
             print('Projekt {}'.format(self.name))
             print('--------------------')
-            print('1. Rozpocznij test')
+            print('1. Rozpocznij test sterownika')
             print('--------------------')
             if self.devpath:
                 print('2. Wybierz sterownik (wybrano {})'.format(self.devpath))
@@ -50,8 +75,9 @@ class Project:
             else:
                 print('3. Wybierz korpus')
             print('4. Wybierz urzadzenia (wybrano {} urządzen)'.format(len(self.devices)))
+            print('5. Zrestartuj wszystkie urzadzenia')
             print('--------------------')
-            print('5. Zapisz projekt')
+            print('6. Zapisz projekt')
             print('0. Wyjscie')
             print('--------------------')
             choice = int(input('Wybor: '))
@@ -63,6 +89,13 @@ class Project:
                 self.choose_driver()
             elif choice == 4:
                 self.choose_devices()
+            elif choice == 5:
+                self.reboot_devices()
+            elif choice == 6:
+                self.save()
+
+    def reboot_devices(self):
+        pass
 
     def start_test(self):
         if len(self.devices) == 0:
@@ -72,7 +105,7 @@ class Project:
         print('Pushing agents')
         for d in self.devices:
             d.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
-            self.fuzzers.append(Fuzzer(d, port))
+            self.fuzzers.append(Fuzzer(d, port, self.devpath))
             port += 1
         for f in self.fuzzers:
             t = threading.Thread(target=f.run, daemon=True)
@@ -87,6 +120,8 @@ class Project:
             f.stop()
         for t in self.threads:
             t.join()
+        self.fuzzers = []
+        self.threads = []
         print('{} active threads'.format(threading.active_count()-1))
 
     def choose_driver(self):

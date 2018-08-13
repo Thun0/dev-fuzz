@@ -45,6 +45,7 @@ def create_new_project():
             print('Projekt o podanej nazwie juz istnieje!')
         else:
             project = Project(project_name)
+            project.create(p)
             settings.config['project'] = project
             print('Stworzono projekt: {}'.format(p))
             project.main_menu()

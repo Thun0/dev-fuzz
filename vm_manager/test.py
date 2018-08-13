@@ -1,16 +1,17 @@
 import socket
 from sender.message import Message, MessageType
 import time
-
+from mutator import mutator
 
 def test1():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(("localhost", 42501))
+    s.connect(("localhost", 57001))
+    s.close()
     msg = Message(MessageType.DEV_PATH, '/dev/null')
     data = msg.pack()
     print(data)
     s.send(data)
-    msg = Message(MessageType.IOCTL, 13371337, 'ablablablablabala'.encode());
+    msg = Message(MessageType.IOCTL, 13371337, 'ablablablablabala'.encode())
     data = msg.pack()
     print(data)
     s.send(data)
@@ -18,4 +19,8 @@ def test1():
     s.close()
 
 
-test1()
+def test2():
+    m = Mutator()
+
+
+test2()

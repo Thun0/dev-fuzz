@@ -7,9 +7,7 @@ class Corpus:
 
     inputs = []
 
-    def __init__(self, dir_path=None):
-        if dir_path is None:
-            dir_path = settings.config["corpus"]["dir_path"]
+    def __init__(self, dir_path):
         for file in listdir(dir_path):
             self.inputs.append(file)
 
@@ -24,4 +22,4 @@ class Corpus:
 
     def get_random_input(self):
         idx = random.randint(0, len(self.inputs))
-        return self.inputs[idx]
+        return self.inputs[idx].read()

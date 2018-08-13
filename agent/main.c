@@ -8,8 +8,8 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <android/log.h>
 
-#define PORT 42501
 #define MAX_MSG_LEN 4096
 
 #define MSG_DEV_PATH 1
@@ -20,13 +20,13 @@
 char driver_path[4096];
 int driver_fd = -1;
 
-int create_listen_socket()
+int create_listen_socket(int port)
 {
     struct sockaddr_in serv_addr;
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(PORT); 
+    serv_addr.sin_port = htons(port);
     bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     return sock;
 }
@@ -118,23 +118,30 @@ void start_receiver(int sock)
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    int listen_socket = create_listen_socket();
+    if(argc != 2)
+    {
+        printf("Podaj port!\n");
+        return 0;
+    }
+    int port = strtol(argv[1], NULL, 10);
+    int listen_socket = create_listen_socket(port);
     listen(listen_socket, 10);
     printf("Starting to listen...\n");
-    while(1)
+    __android_log_print(ANDROID_LOG_ERROR, "MY_TAG", "Starting to listen...\n");
+    struct sockaddr_in rec_addr;
+    int ssize = sizeof(struct sockaddr_in);
+    int rec_sock = accept(listen_socket, (struct sockaddr*)&rec_addr, (socklen_t*)&ssize);
+    char ip_str[INET_ADDRSTRLEN];
+    if(inet_ntop(AF_INET, &(rec_addr.sin_addr), ip_str, INET_ADDRSTRLEN) == NULL)
     {
-        struct sockaddr_in rec_addr;
-        int ssize = sizeof(struct sockaddr_in);
-        int rec_sock = accept(listen_socket, (struct sockaddr*)&rec_addr, (socklen_t*)&ssize);
-        char ip_str[INET_ADDRSTRLEN];
-        if(inet_ntop(AF_INET, &(rec_addr.sin_addr), ip_str, INET_ADDRSTRLEN) == NULL)
-        {
-            printf("ERROR!!\n");
-        }
-        printf("Connection accepted from %s:%d.\n", ip_str, rec_addr.sin_port);
-        start_receiver(rec_sock);
+        printf("ERROR!!\n");
     }
+    __android_log_print(ANDROID_LOG_ERROR, "MY_TAG", "Connection accepted from %s:%d.\n", ip_str, rec_addr.sin_port);
+    printf("Connection accepted from %s:%d.\n", ip_str, rec_addr.sin_port);
+    start_receiver(rec_sock);
+    printf("Finished");
+    __android_log_print(ANDROID_LOG_ERROR, "MY_TAG", "Finished");
     return 0;
 }
