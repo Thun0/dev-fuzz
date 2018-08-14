@@ -1,6 +1,8 @@
 from pathlib import Path
 import settings
 from project import Project
+from view.mainwindow import MainWindow
+from model import Model
 
 
 def menu():
@@ -77,4 +79,6 @@ def load_project():
 
 
 if __name__ == "__main__":
-    menu()
+    model = Model()
+    main_window = MainWindow(model)
+    main_window.run()
