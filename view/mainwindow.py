@@ -3,6 +3,8 @@ from tkinter import filedialog
 from view.newprojectwindow import NewProjectWindow
 from tkinter import PanedWindow
 from tkinter import Label
+from tkinter import Checkbutton
+from tkinter import IntVar
 
 
 class MainWindow:
@@ -22,32 +24,33 @@ class MainWindow:
         menubar.add_cascade(label="Projekt", menu=project_menu)
         menubar.add_cascade(label="Ustawienia")
         menubar.add_cascade(label="Pomoc")
+        self.chosen_methods = [IntVar(), IntVar(), IntVar()]
+        self.pane_title_font = 'Helvetica 11 bold'
 
+        main_area = PanedWindow(self.window)
+        left_pane = PanedWindow(main_area, width=width*2/3, relief=tk.RIDGE, orient=tk.VERTICAL)
+        right_pane = PanedWindow(main_area, relief=tk.RIDGE, orient=tk.VERTICAL)
 
-        left_pane_options = {}
-        left_pane_options['width'] = width*2/3
-        left_pane_options['relief'] = tk.RIDGE
-
-        default_pane_options = {}
-        default_pane_options['relief'] = tk.RIDGE
-
-        main_area = PanedWindow(self.window, **default_pane_options)
-        left_pane = PanedWindow(main_area, **left_pane_options, orient=tk.VERTICAL)
-        right_pane = PanedWindow(main_area, **default_pane_options, orient=tk.VERTICAL)
-        methods_pane = PanedWindow(right_pane, **default_pane_options)
-        devices_pane = PanedWindow(right_pane, **default_pane_options)
-        right_pane.add(methods_pane)
-        right_pane.add(devices_pane)
+        self.initialize_left_pane(left_pane)
+        self.initialize_right_pane(right_pane)
         main_area.add(left_pane)
         main_area.add(right_pane)
         main_area.pack(fill=tk.BOTH, expand=1)
-
-
-        left_pane.add(Label(text='1'))
-        methods_pane.add(Label(text='2'))
-        devices_pane.add(Label(text='3'))
-
         self.window.config(menu=menubar)
+
+    def initialize_left_pane(self, left_pane):
+        left_pane.add(Label(text='Projekt: {}'.format('test'), font='Helvetica 16 bold'))
+
+    def initialize_right_pane(self, right_pane):
+        methods_pane = PanedWindow(right_pane, relief=tk.RIDGE, orient=tk.VERTICAL)
+        methods_pane.add(Label(text='Metody', font=self.pane_title_font))
+        methods_pane.add(Checkbutton(methods_pane, text='ioctl', variable=self.chosen_methods[0]))
+        methods_pane.add(Checkbutton(methods_pane, text='write', variable=self.chosen_methods[1]))
+        methods_pane.add(Checkbutton(methods_pane, text='mmap', variable=self.chosen_methods[2]))
+        devices_pane = PanedWindow(right_pane, relief=tk.RIDGE)
+        right_pane.add(methods_pane)
+        right_pane.add(devices_pane)
+        devices_pane.add(Label(text='Urządzenia', font=self.pane_title_font))
 
     def run(self):
         self.window.mainloop()
