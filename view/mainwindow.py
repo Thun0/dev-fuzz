@@ -40,6 +40,7 @@ class MainWindow:
 
     def initialize_left_pane(self, left_pane):
         left_pane.add(Label(text='Projekt: {}'.format('test'), font='Helvetica 16 bold'))
+        self.initialize_main_pane()
 
     def initialize_right_pane(self, right_pane):
         methods_pane = PanedWindow(right_pane, relief=tk.RIDGE, orient=tk.VERTICAL)
@@ -51,6 +52,18 @@ class MainWindow:
         right_pane.add(methods_pane)
         right_pane.add(devices_pane)
         devices_pane.add(Label(text='Urządzenia', font=self.pane_title_font))
+
+    def initialize_main_pane(self):
+        pass
+
+    def initialize_log_pane(self):
+        pass
+
+    def initialize_methods_pane(self):
+        pass
+
+    def initialize_devices_pane(self):
+        pass
 
     def run(self):
         self.window.mainloop()
