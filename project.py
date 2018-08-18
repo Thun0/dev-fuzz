@@ -9,11 +9,11 @@ from pathlib import Path
 
 class Project:
 
-    def __init__(self, name):
+    def __init__(self, name=''):
         self.name = name
         self.filepath = ''
         self.devices = []
-        self.devpath = None
+        self.devpath = ''
         self.corpuspath = None
         self.fuzzers = []
         self.error = None

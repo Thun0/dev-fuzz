@@ -81,4 +81,5 @@ def load_project():
 if __name__ == "__main__":
     model = Model()
     main_window = MainWindow(model)
+    model.view = main_window
     main_window.run()

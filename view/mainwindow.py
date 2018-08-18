@@ -1,20 +1,30 @@
+from view.newprojectwindow import NewProjectWindow
+from android import utils
 import tkinter as tk
 from tkinter import filedialog
-from view.newprojectwindow import NewProjectWindow
-from tkinter import PanedWindow
+from tkinter import Frame
 from tkinter import Label
 from tkinter import Checkbutton
 from tkinter import IntVar
+from tkinter import Listbox
+from tkinter import Button
+from tkinter import Text
 
 
 class MainWindow:
+
+    devices_lb = None
+
     def __init__(self, model):
         width = 800
         height = 600
+        self.log_txt = None
         self.model = model
         self.window = tk.Tk()
         self.window.title('ADFuzz')
         self.window.geometry('{}x{}'.format(width, height))
+        self.chosen_methods = [IntVar(), IntVar(), IntVar()]
+        self.pane_title_font = 'Helvetica 11 bold'
         menubar = tk.Menu(self.window)
         project_menu = tk.Menu(menubar, tearoff=0)
         project_menu.add_command(label="Nowy", command=self.new_project)
@@ -24,46 +34,65 @@ class MainWindow:
         menubar.add_cascade(label="Projekt", menu=project_menu)
         menubar.add_cascade(label="Ustawienia")
         menubar.add_cascade(label="Pomoc")
-        self.chosen_methods = [IntVar(), IntVar(), IntVar()]
-        self.pane_title_font = 'Helvetica 11 bold'
-
-        main_area = PanedWindow(self.window)
-        left_pane = PanedWindow(main_area, width=width*2/3, relief=tk.RIDGE, orient=tk.VERTICAL)
-        right_pane = PanedWindow(main_area, relief=tk.RIDGE, orient=tk.VERTICAL)
-
-        self.initialize_left_pane(left_pane)
-        self.initialize_right_pane(right_pane)
-        main_area.add(left_pane)
-        main_area.add(right_pane)
-        main_area.pack(fill=tk.BOTH, expand=1)
         self.window.config(menu=menubar)
+        self.window.columnconfigure(0, weight=1)
+        self.window.columnconfigure(1, weight=1)
+        self.window.rowconfigure(0, weight=3)
+        self.window.rowconfigure(1, weight=1)
+        self.init()
 
-    def initialize_left_pane(self, left_pane):
-        left_pane.add(Label(text='Projekt: {}'.format('test'), font='Helvetica 16 bold'))
-        self.initialize_main_pane()
+    def init(self):
+        if self.model.project is not None:
+            self.initialize_left_frame()
+            self.initialize_right_frame()
 
-    def initialize_right_pane(self, right_pane):
-        methods_pane = PanedWindow(right_pane, relief=tk.RIDGE, orient=tk.VERTICAL)
-        methods_pane.add(Label(text='Metody', font=self.pane_title_font))
-        methods_pane.add(Checkbutton(methods_pane, text='ioctl', variable=self.chosen_methods[0]))
-        methods_pane.add(Checkbutton(methods_pane, text='write', variable=self.chosen_methods[1]))
-        methods_pane.add(Checkbutton(methods_pane, text='mmap', variable=self.chosen_methods[2]))
-        devices_pane = PanedWindow(right_pane, relief=tk.RIDGE)
-        right_pane.add(methods_pane)
-        right_pane.add(devices_pane)
-        devices_pane.add(Label(text='Urządzenia', font=self.pane_title_font))
+    def initialize_left_frame(self):
+        project_frame = Frame(self.window)
+        log_frame = Frame(self.window)
+        project_frame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        log_frame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        log_frame.columnconfigure(0, weight=1)
+        log_frame.rowconfigure(1, weight=1)
+        self.initialize_project_frame(project_frame)
+        self.initialize_log_frame(log_frame)
 
-    def initialize_main_pane(self):
+    def initialize_right_frame(self):
+        methods_frame = Frame(self.window)
+        devices_frame = Frame(self.window)
+        devices_frame.columnconfigure(0, weight=1)
+        devices_frame.rowconfigure(1, weight=1)
+        self.initialize_methods_frame(methods_frame)
+        self.initialize_devices_frame(devices_frame)
+        methods_frame.grid(row=0, column=1)
+        devices_frame.grid(row=1, column=1, sticky=tk.N+tk.E+tk.S+tk.W)
+
+    def refresh_device_list(self):
         pass
 
-    def initialize_log_pane(self):
-        pass
+    def initialize_project_frame(self, project_frame):
+        Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW)
+        Label(project_frame, text='Wybrany sterownik: {}'.format(self.model.project.devpath)).grid(row=1, sticky=tk.NW, pady=20)
+        Button(project_frame, text='Wybierz').grid(row=1, column=1, sticky=tk.NW, pady=10)
+        Label(project_frame, text='Wybrany korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, sticky=tk.NW)
 
-    def initialize_methods_pane(self):
-        pass
+    def initialize_log_frame(self, log_frame):
+        Label(log_frame, text='Log').grid()
+        self.log_txt = Text(log_frame, height=5, width=60, wrap=tk.WORD)
+        self.log_txt.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
 
-    def initialize_devices_pane(self):
-        pass
+    def initialize_methods_frame(self, methods_frame):
+        Label(methods_frame, text='Metody', font=self.pane_title_font).grid(row=0, column=0, sticky=tk.NW)
+        Checkbutton(methods_frame, text='ioctl', variable=self.chosen_methods[0]).grid(row=1, column=0, sticky=tk.NW)
+        Checkbutton(methods_frame, text='write', variable=self.chosen_methods[1]).grid(row=2, column=0, sticky=tk.NW)
+        Checkbutton(methods_frame, text='mmap', variable=self.chosen_methods[2]).grid(row=3, column=0, sticky=tk.NW)
+
+    def initialize_devices_frame(self, devices_frame):
+        Label(devices_frame, text='Urządzenia', font=self.pane_title_font).grid(row=0, sticky=tk.NW)
+        self.devices_lb = Listbox(devices_frame, height=5)
+        for d in utils.get_devices():
+            self.devices_lb.insert(tk.END, d.name)
+        self.devices_lb.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
+        Button(devices_frame, text='Odśwież').grid(row=2)
 
     def run(self):
         self.window.mainloop()
