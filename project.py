@@ -30,7 +30,7 @@ class Project:
             pp = p/'{}{}'.format(suffix, idx)
             idx += 1
 
-        self.corpuspath = pp
+        self.corpuspath = str(pp)
         pp.mkdir(0o755)
         p1 = pp / 'ioctl'
         p2 = pp / 'write'
@@ -38,6 +38,7 @@ class Project:
         p1.mkdir(0o755)
         p2.mkdir(0o755)
         p3.mkdir(0o755)
+        self.save()
 
     def load(self, path):
         self.filepath = path

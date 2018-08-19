@@ -46,48 +46,47 @@ class MainWindow:
         menubar.add_cascade(label="Pomoc")
 
         self.window.config(menu=menubar)
-        self.window.columnconfigure(0, weight=1)
+        #self.window.columnconfigure(0, weight=1)
         self.window.columnconfigure(1, weight=1)
-        self.window.rowconfigure(0, weight=3)
+        self.window.rowconfigure(0, weight=2)
         self.window.rowconfigure(1, weight=1)
         self.init()
 
     def init(self):
         if self.model.project is not None:
-            self.initialize_left_frame()
-            self.initialize_right_frame()
+            self.initialize_window()
 
-    def initialize_left_frame(self):
+    def initialize_window(self):
         project_frame = Frame(self.window)
-        log_frame = Frame(self.window)
+        log_frame = Frame(self.window, relief=tk.SUNKEN)
         project_frame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
-        log_frame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        log_frame.grid(row=1, column=0, columnspan=5, sticky=tk.N+tk.E+tk.S+tk.W, padx=5, pady=5)
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(1, weight=1)
         self.initialize_project_frame(project_frame)
         self.initialize_log_frame(log_frame)
-
-    def initialize_right_frame(self):
-        methods_frame = Frame(self.window)
         devices_frame = Frame(self.window)
         devices_frame.columnconfigure(0, weight=1)
         devices_frame.rowconfigure(1, weight=1)
-        self.initialize_methods_frame(methods_frame)
         self.initialize_devices_frame(devices_frame)
-        methods_frame.grid(row=0, column=1)
-        devices_frame.grid(row=1, column=1, sticky=tk.N+tk.E+tk.S+tk.W)
+        devices_frame.grid(row=0, column=1, sticky=tk.N+tk.E+tk.S+tk.W, padx=10)
 
     def refresh_device_list(self):
         pass
 
     def initialize_project_frame(self, project_frame):
-        Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW)
-        Label(project_frame, text='Wybrany sterownik: {}'.format(self.model.project.devpath)).grid(row=1, sticky=tk.NW, pady=20)
-        Button(project_frame, text='Wybierz').grid(row=1, column=1, sticky=tk.NW, pady=10)
-        Label(project_frame, text='Wybrany korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, sticky=tk.NW)
+        Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW, pady=10)
+        Label(project_frame, text='Sterownik: {}'.format(self.model.project.devpath)).grid(row=1, sticky=tk.NW, pady=20)
+        Button(project_frame, text='Wybierz').grid(row=1, column=1, sticky=tk.NE, pady=13, padx=5)
+        Label(project_frame, text='Korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, sticky=tk.NW, pady=5)
+        Button(project_frame, text='Wybierz').grid(row=2, column=1, sticky=tk.NE, padx=5)
+        methods_frame = Frame(project_frame)
+        self.initialize_methods_frame(methods_frame)
+        methods_frame.grid(row=3, column=0, sticky=tk.NW, pady=20)
+        Button(project_frame, text='Start').grid(row=4)
 
     def initialize_log_frame(self, log_frame):
-        Label(log_frame, text='Log').grid()
+        Label(log_frame, text='Log').grid(sticky=tk.NW)
         self.log_txt = Text(log_frame, height=5, width=60, wrap=tk.WORD)
         self.log_txt.config(state=tk.DISABLED)
         self.log_txt.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
