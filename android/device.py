@@ -12,6 +12,8 @@ class AndroidDevice:
                                                dev.get_properties()['ro.product.device'], self.serial)
         self.rooted = False
         self.check_root()
+        if self.rooted:
+            self.name += '(root)'
 
     def check_root(self):
         if str(self.device.shell("echo 'id' | su"))[:11] == 'uid=0(root)':

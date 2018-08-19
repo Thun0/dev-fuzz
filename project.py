@@ -22,19 +22,22 @@ class Project:
     def create(self, path):
         self.filepath = path
         Path(self.filepath).touch(0o644)
-        self.corpuspath = '{}{}'.format(settings.config['corpuses_dir'], self.name)
-        p = Path().absolute().parents[0]
-        p /= Path(self.corpuspath)
-        if not p.exists():
-            p.mkdir(0o755)
-            p1 = p / 'ioctl'
-            p2 = p / 'write'
-            p3 = p / 'mmap'
-            p1.mkdir(0o755)
-            p2.mkdir(0o755)
-            p3.mkdir(0o755)
-        else:
-            print('ERR: Korpus juz istnieje')
+        p = Path(self.filepath).absolute().parents[0]
+        suffix = self.filepath.split('/')[-1].split('.')[0]
+        pp = p/suffix
+        idx = 1
+        while pp.exists():
+            pp = p/'{}{}'.format(suffix, idx)
+            idx += 1
+
+        self.corpuspath = pp
+        pp.mkdir(0o755)
+        p1 = pp / 'ioctl'
+        p2 = pp / 'write'
+        p3 = pp / 'mmap'
+        p1.mkdir(0o755)
+        p2.mkdir(0o755)
+        p3.mkdir(0o755)
 
     def load(self, path):
         self.filepath = path

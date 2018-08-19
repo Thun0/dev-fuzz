@@ -1,5 +1,4 @@
 from os import listdir
-import settings
 import random
 
 

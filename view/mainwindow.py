@@ -25,15 +25,26 @@ class MainWindow:
         self.window.geometry('{}x{}'.format(width, height))
         self.chosen_methods = [IntVar(), IntVar(), IntVar()]
         self.pane_title_font = 'Helvetica 11 bold'
+
         menubar = tk.Menu(self.window)
         project_menu = tk.Menu(menubar, tearoff=0)
         project_menu.add_command(label="Nowy", command=self.new_project)
         project_menu.add_command(label="Załaduj", command=self.load_project_file)
         project_menu.add_command(label="Zapisz", command=self.save_project_file)
         project_menu.add_command(label="Zapisz jako..", command=self.save_project_file_as)
+
+        corpus_menu = tk.Menu(menubar, tearoff=0)
+        corpus_menu.add_command(label="Dodaj")
+
+        settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu.add_command(label="Ogólne")
+        settings_menu.add_command(label="Mutator")
+
         menubar.add_cascade(label="Projekt", menu=project_menu)
-        menubar.add_cascade(label="Ustawienia")
+        menubar.add_cascade(label="Korpus", menu=corpus_menu)
+        menubar.add_cascade(label="Ustawienia", menu=settings_menu)
         menubar.add_cascade(label="Pomoc")
+
         self.window.config(menu=menubar)
         self.window.columnconfigure(0, weight=1)
         self.window.columnconfigure(1, weight=1)
@@ -78,6 +89,7 @@ class MainWindow:
     def initialize_log_frame(self, log_frame):
         Label(log_frame, text='Log').grid()
         self.log_txt = Text(log_frame, height=5, width=60, wrap=tk.WORD)
+        self.log_txt.config(state=tk.DISABLED)
         self.log_txt.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
 
     def initialize_methods_frame(self, methods_frame):
@@ -103,21 +115,21 @@ class MainWindow:
         options['filetypes'] = [('Pliki projektu', '.afz'), ('Wszystkie pliki', '.*')]
         options['title'] = 'Załaduj projekt'
         filename = filedialog.askopenfilename(**options)
-        self.model.load_project(filename)
+        if filename is not ():
+            self.model.load_project(filename)
 
     def new_project(self):
-        new_project_window = NewProjectWindow(self.window)
+        NewProjectWindow(self, self.model)
 
     def save_project_file(self):
-        if self.model.saved:
-            self.model.save()
-        else:
-            self.save_project_file_as()
+        if self.model is not None:
+            self.model.save_project(self.model.project.filepath)
 
     def save_project_file_as(self):
-        options = {}
-        options['defaultextension'] = '.afz'
-        options['filetypes'] = [('Pliki projektu', '.afz'), ('Wszystkie pliki', '.*')]
-        options['title'] = 'Zapisz projekt jako..'
-        filename = filedialog.asksaveasfilename(**options)
-        self.model.save_project(filename)
+        if self.model is not None:
+            options = {}
+            options['defaultextension'] = '.afz'
+            options['filetypes'] = [('Pliki projektu', '.afz'), ('Wszystkie pliki', '.*')]
+            options['title'] = 'Zapisz projekt jako..'
+            filename = filedialog.asksaveasfilename(**options)
+            self.model.save_project(filename)
