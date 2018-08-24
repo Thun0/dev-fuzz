@@ -1,4 +1,6 @@
 from view.newprojectwindow import NewProjectWindow
+from view.driverswindow import DriversWindow
+from view.progresswindow import ProgressWindow
 from android import utils
 import tkinter as tk
 from tkinter import filedialog
@@ -9,6 +11,8 @@ from tkinter import IntVar
 from tkinter import Listbox
 from tkinter import Button
 from tkinter import Text
+from tkinter import Radiobutton
+from tkinter import Entry
 
 
 class MainWindow:
@@ -19,8 +23,14 @@ class MainWindow:
         width = 800
         height = 600
         self.log_txt = None
+        self.start_btn = None
+        self.end_count_entry = None
+        self.end_hour_entry = None
+        self.end_minute_entry = None
         self.model = model
         self.window = tk.Tk()
+        self.data_source = IntVar()
+        self.end_cause = IntVar()
         self.window.title('ADFuzz')
         self.window.geometry('{}x{}'.format(width, height))
         self.chosen_methods = [IntVar(), IntVar(), IntVar()]
@@ -42,6 +52,7 @@ class MainWindow:
 
         menubar.add_cascade(label="Projekt", menu=project_menu)
         menubar.add_cascade(label="Korpus", menu=corpus_menu)
+        menubar.add_cascade(label="Generator")
         menubar.add_cascade(label="Ustawienia", menu=settings_menu)
         menubar.add_cascade(label="Pomoc")
 
@@ -75,15 +86,38 @@ class MainWindow:
         pass
 
     def initialize_project_frame(self, project_frame):
-        Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW, pady=10)
-        Label(project_frame, text='Sterownik: {}'.format(self.model.project.devpath)).grid(row=1, sticky=tk.NW, pady=20)
-        Button(project_frame, text='Wybierz').grid(row=1, column=1, sticky=tk.NE, pady=13, padx=5)
-        Label(project_frame, text='Korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, sticky=tk.NW, pady=5)
-        Button(project_frame, text='Wybierz').grid(row=2, column=1, sticky=tk.NE, padx=5)
+        Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW, columnspan=4, pady=10)
+        Label(project_frame, text='Sterownik: {}'.format(self.model.project.devpath)).grid(row=1, columnspan=4, sticky=tk.NW, pady=20)
+        Button(project_frame, text='Wybierz', command=self.list_drivers).grid(row=1, column=5, sticky=tk.NE, pady=13, padx=5)
+        Label(project_frame, text='Korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, columnspan=4, sticky=tk.NW, pady=5)
+        Button(project_frame, text='Wybierz').grid(row=2, column=5, sticky=tk.NE, padx=5)
+        Label(project_frame, text='Źródło danych', font=self.pane_title_font).grid(row=3, column=0, sticky=tk.NW, pady=10)
+        Radiobutton(project_frame, text='Korpus', variable=self.data_source, value=0).grid(row=4, column=0, sticky=tk.NW)
+        Radiobutton(project_frame, text='Generator', variable=self.data_source, value=1).grid(row=5, column=0, sticky=tk.NW)
         methods_frame = Frame(project_frame)
         self.initialize_methods_frame(methods_frame)
-        methods_frame.grid(row=3, column=0, sticky=tk.NW, pady=20)
-        Button(project_frame, text='Start').grid(row=4)
+        methods_frame.grid(row=6, column=0, sticky=tk.NW, pady=10)
+        Label(project_frame, text='Warunek zakończenia testu', font=self.pane_title_font).grid(row=7, column=0, sticky=tk.NW)
+        Radiobutton(project_frame, text='Brak', variable=self.end_cause, value=0).grid(row=8, column=0,
+                                                                                       sticky=tk.NW)
+        Radiobutton(project_frame, text='Czas', variable=self.end_cause, value=1).grid(row=9, column=0,
+                                                                                           sticky=tk.NW)
+        self.end_hour_entry = Entry(project_frame, width=2)
+        self.end_hour_entry.grid(row=9, column=1, sticky=tk.NW)
+        Label(project_frame, text='h').grid(row=9, column=2, sticky=tk.NW)
+        self.end_minute_entry = Entry(project_frame, width=2)
+        self.end_minute_entry.grid(row=9, column=3, sticky=tk.NW)
+        self.end_hour_entry.insert(tk.END, '0')
+        self.end_minute_entry.insert(tk.END, '0')
+        Label(project_frame, text='m').grid(row=9, column=4, sticky=tk.NW)
+        Radiobutton(project_frame, text='Liczba wywołań', variable=self.end_cause, value=2).grid(row=10, column=0,
+                                                                                              sticky=tk.NW)
+        self.end_count_entry = Entry(project_frame)
+        self.end_count_entry.insert(tk.END, '100000')
+        self.end_count_entry.grid(row=10, column=1, columnspan=4, sticky=tk.NW)
+        self.start_btn = Button(project_frame, text='Start', command=self.start_run)
+        self.start_btn.grid(row=11, pady=20, padx=10, sticky=tk.NE)
+        Button(project_frame, text='Restart').grid(row=11, column=1, columnspan=4, pady=20, sticky=tk.NW)
 
     def initialize_log_frame(self, log_frame):
         Label(log_frame, text='Log').grid(sticky=tk.NW)
@@ -108,6 +142,15 @@ class MainWindow:
     def run(self):
         self.window.mainloop()
 
+    def log(self, txt):
+        self.log_txt.config(state=tk.NORMAL)
+        self.log_txt.insert(tk.END, txt)
+        self.log_txt.config(state=tk.DISABLED)
+
+    def start_run(self):
+        self.log('Starting testing process..\n')
+        self.model.start_run()
+
     def load_project_file(self):
         options = {}
         options['defaultextension'] = '.afz'
@@ -119,6 +162,9 @@ class MainWindow:
 
     def new_project(self):
         NewProjectWindow(self, self.model)
+
+    def list_drivers(self):
+        DriversWindow(self, self.model)
 
     def save_project_file(self):
         if self.model is not None:

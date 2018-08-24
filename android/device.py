@@ -28,3 +28,8 @@ class AndroidDevice:
                     self.rooted = True
                 else:
                     raise RuntimeError(str(e))
+
+    def get_char_devices(self):
+        ret = []
+        output = self.device.shell("echo 'ls -laR / 2>/dev/null' | su | grep -E ^c")
+        return output.split('\n')

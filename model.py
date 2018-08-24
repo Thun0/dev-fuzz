@@ -1,6 +1,7 @@
 from project import Project
 from corpus.corpus import Corpus
 from pathlib import Path
+from android import utils
 
 
 class Model:
@@ -11,6 +12,8 @@ class Model:
         self.project = None
         self.view = None
         self.corpus = None
+        self.devices = []
+        self.get_devices()
 
     def new_project(self, filepath, name):
         self.project = Project(name=name)
@@ -34,5 +37,15 @@ class Model:
         self.project.filepath = filepath
         self.project.save()
 
+    def get_devices(self):
+        self.devices = utils.get_devices()
+        return self.devices
+
     def list_dev_paths(self):
+        char_devs = []
+        for d in self.devices:
+            char_devs.extend(d.get_char_devices())
+        return char_devs
+
+    def start_run(self):
         pass

@@ -3,6 +3,7 @@ from settings import config
 import subprocess
 from android.device import AndroidDevice
 
+
 def get_devices():
     adb = subprocess.Popen(['adb', '-P', str(config['adb_port']), 'start-server'], stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
