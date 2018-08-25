@@ -32,7 +32,9 @@ class DriversWindow:
         Button(self.window, text='Anuluj', command=self.destroy).grid(row=2, column=1, sticky=tk.NW, padx=10)
 
     def pick_dev(self):
-        pass
+        self.model.project.devpath = self.listbox.get(self.listbox.curselection()).split()[-1]
+        self.parent.refresh_driver()
+        self.destroy()
 
     def populate_list(self):
         dev_list = self.model.list_dev_paths()

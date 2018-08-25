@@ -27,6 +27,7 @@ class MainWindow:
         self.end_count_entry = None
         self.end_hour_entry = None
         self.end_minute_entry = None
+        self.devpath_label = None
         self.model = model
         self.window = tk.Tk()
         self.data_source = IntVar()
@@ -87,7 +88,8 @@ class MainWindow:
 
     def initialize_project_frame(self, project_frame):
         Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW, columnspan=4, pady=10)
-        Label(project_frame, text='Sterownik: {}'.format(self.model.project.devpath)).grid(row=1, columnspan=4, sticky=tk.NW, pady=20)
+        self.devpath_label = Label(project_frame, text='Sterownik: {}'.format(self.model.project.devpath))
+        self.devpath_label.grid(row=1, columnspan=4, sticky=tk.NW, pady=20)
         Button(project_frame, text='Wybierz', command=self.list_drivers).grid(row=1, column=5, sticky=tk.NE, pady=13, padx=5)
         Label(project_frame, text='Korpus: {}'.format(self.model.project.corpuspath)).grid(row=2, columnspan=4, sticky=tk.NW, pady=5)
         Button(project_frame, text='Wybierz').grid(row=2, column=5, sticky=tk.NE, padx=5)
@@ -138,6 +140,9 @@ class MainWindow:
             self.devices_lb.insert(tk.END, d.name)
         self.devices_lb.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
         Button(devices_frame, text='Odśwież').grid(row=2)
+
+    def refresh_driver(self):
+        self.devpath_label.config(text='Sterownik: {}'.format(self.model.project.devpath))
 
     def run(self):
         self.window.mainloop()

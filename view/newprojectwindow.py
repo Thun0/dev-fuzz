@@ -37,7 +37,6 @@ class NewProjectWindow:
 
     def create(self):
         self.model.new_project(self.path_label['text'], self.name_entry.get())
-        self.parent.init()
         self.destroy()
 
     def destroy(self):

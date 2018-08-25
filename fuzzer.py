@@ -1,16 +1,19 @@
 import threading
 import socket
 from sender.message import Message, MessageType
+from mutator.mutator import Mutator
+from corpus.corpus import Corpus
 import time
 
 
 class Fuzzer:
 
-    def __init__(self, dev, port, path):
+    def __init__(self, dev, port, path, corpus):
         self.device = dev
         self.port = port
         self.running = False
         self.devpath = path
+        self.corpus = corpus
 
     def run(self):
         self.device.forward('tcp:' + str(self.port), 'tcp:' + str(self.port))

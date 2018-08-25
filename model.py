@@ -2,6 +2,10 @@ from project import Project
 from corpus.corpus import Corpus
 from pathlib import Path
 from android import utils
+import threading
+import settings
+from fuzzer import Fuzzer
+from corpus.corpus import Corpus
 
 
 class Model:
@@ -13,14 +17,24 @@ class Model:
         self.view = None
         self.corpus = None
         self.devices = []
+        self.fuzzers = []
+        self.threads = []
         self.get_devices()
+
+    def install_busybox(self):
+        if len(self.devices) is not 0:
+            self.view.log('Instaluję busybox...\n')
+            for d in self.devices:
+                if d.rooted:
+                    d.install_busybox()
+            self.view.log('Busybox zainstalowany\n')
 
     def new_project(self, filepath, name):
         self.project = Project(name=name)
         self.project.create(filepath)
-        print('Stworzylem')
-        print(self.project.name)
-        print(self.project.corpuspath)
+        self.view.init()
+        threading.Thread(target=self.install_busybox).start()
+        self.corpus = Corpus(self.project.corpuspath)
 
     def load_project(self, filepath):
         self.project = Project()
@@ -32,6 +46,7 @@ class Model:
         else:
             self.corpus = Corpus(self.project.corpuspath)
         self.view.init()
+        threading.Thread(target=self.install_busybox).start()
 
     def save_project(self, filepath):
         self.project.filepath = filepath
@@ -47,5 +62,15 @@ class Model:
             char_devs.extend(d.get_char_devices())
         return char_devs
 
-    def start_run(self):
-        pass
+    def start_run(self, chosen_devices):
+        port = settings.config['devices_start_port']
+        self.view.log('Instaluję agenta na urządzeniach ({})...\n'.format(len(chosen_devices)))
+        for d in chosen_devices:
+            d.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
+            self.fuzzers.append(Fuzzer(d, port, self.project.devpath, self.corpus))
+            port += 1
+        for f in self.fuzzers:
+            t = threading.Thread(target=f.run, daemon=True)
+            self.threads.append(t)
+            t.start()
+        self.view.log('Rozpoczęto testowanie!\n')
