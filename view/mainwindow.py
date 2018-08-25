@@ -135,7 +135,7 @@ class MainWindow:
 
     def initialize_devices_frame(self, devices_frame):
         Label(devices_frame, text='Urządzenia', font=self.pane_title_font).grid(row=0, sticky=tk.NW)
-        self.devices_lb = Listbox(devices_frame, height=5)
+        self.devices_lb = Listbox(devices_frame, selectmode=tk.EXTENDED, height=5)
         for d in utils.get_devices():
             self.devices_lb.insert(tk.END, d.name)
         self.devices_lb.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
@@ -153,8 +153,15 @@ class MainWindow:
         self.log_txt.config(state=tk.DISABLED)
 
     def start_run(self):
-        self.log('Starting testing process..\n')
-        self.model.start_run()
+        self.log('Rozpoczynam testowanie\n')
+        methods = []
+        if self.chosen_methods[0].get() == 1:
+            methods.append('ioctl')
+        if self.chosen_methods[1].get() == 1:
+            methods.append('write')
+        if self.chosen_methods[2].get() == 1:
+            methods.append('mmap')
+        self.model.start_run(list(self.devices_lb.curselection()), methods)
 
     def load_project_file(self):
         options = {}

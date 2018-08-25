@@ -6,11 +6,13 @@ import threading
 import settings
 from fuzzer import Fuzzer
 from corpus.corpus import Corpus
+import random
 
 
 class Model:
 
     def __init__(self):
+        random.seed()
         self.saved = False
         self.log = ''
         self.project = None
@@ -62,12 +64,14 @@ class Model:
             char_devs.extend(d.get_char_devices())
         return char_devs
 
-    def start_run(self, chosen_devices):
-        port = settings.config['devices_start_port']
+    def start_run(self, chosen_devices, methods):
+        print(methods)
+        #port = settings.config['devices_start_port']
+        port = 1337
         self.view.log('Instaluję agenta na urządzeniach ({})...\n'.format(len(chosen_devices)))
-        for d in chosen_devices:
-            d.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
-            self.fuzzers.append(Fuzzer(d, port, self.project.devpath, self.corpus))
+        for idx in chosen_devices:
+            self.devices[idx].device.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
+            self.fuzzers.append(Fuzzer(self.devices[idx], port, self.project.devpath, self.corpus, methods))
             port += 1
         for f in self.fuzzers:
             t = threading.Thread(target=f.run, daemon=True)

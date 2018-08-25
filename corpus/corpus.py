@@ -54,10 +54,10 @@ class Corpus:
     def get_random_input(self, method):
         if method is 'ioctl':
             idx = random.randint(0, len(self.ioctl_inputs))
-            return self.ioctl_inputs[idx].split('\n')
+            return self.ioctl_inputs[idx]
         if method is 'write':
             idx = random.randint(0, len(self.write_inputs))
-            return self.write_inputs[idx].split('\n')
+            return self.write_inputs[idx]
         if method is 'mmap':
             idx = random.randint(0, len(self.mmap_inputs))
-            return self.mmap_inputs[idx].split('\n')
+            return self.mmap_inputs[idx]
