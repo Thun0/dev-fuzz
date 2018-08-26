@@ -30,6 +30,7 @@ class DriversWindow:
         self.listbox.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W, columnspan=2)
         Button(self.window, text='Wybierz', command=self.pick_dev).grid(row=2, sticky=tk.NE, padx=10)
         Button(self.window, text='Anuluj', command=self.destroy).grid(row=2, column=1, sticky=tk.NW, padx=10)
+        self.window.transient(master=parent.window)
 
     def pick_dev(self):
         self.model.project.devpath = self.listbox.get(self.listbox.curselection()).split()[-1]

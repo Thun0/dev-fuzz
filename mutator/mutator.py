@@ -10,7 +10,7 @@ class Mutator:
     """
 
     def __init__(self, data):
-        self.data = bytearray(copy.copy(data).encode())
+        self.data = bytearray(copy.copy(data))
 
     def randomize_bytes(self):
         """

@@ -27,6 +27,7 @@ class Message:
             return struct.pack('=ii{}s'.format(len(self.path)), self.type.value, len(self.path), self.path.encode())
         elif self.type == MessageType.IOCTL:
             print('Packing ioctl msg')
+            print(self.req)
             return struct.pack('=iQi{}s'.format(len(self.args)), self.type.value, self.req, len(self.args), self.args)
         else:
             raise NotImplementedError('This type is not supported')

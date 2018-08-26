@@ -44,10 +44,10 @@ class AndroidDevice:
         if not self.rooted:
             return []
         ret = []
-        output = self.device.shell("echo 'busybox find / -type c ' | su").split('\n')
+        output = self.device.shell("su -c 'busybox find /dev/ -type c | busybox sort'").split('\n')
         for d in output:
             if d.strip() is not '':
-                attrs = self.device.shell("echo 'ls -l {}' | su".format(d.strip())).strip().split()
+                attrs = self.device.shell("su -c 'ls -l {}'".format(d.strip())).strip().split()
                 if attrs[0][0] is 'c':
                     ret.append('{} {} {} {}'.format(attrs[0], attrs[1], attrs[2], d.strip()))
         return ret

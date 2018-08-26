@@ -1,6 +1,9 @@
 from view.newprojectwindow import NewProjectWindow
 from view.driverswindow import DriversWindow
 from view.progresswindow import ProgressWindow
+from view.addioctlwindow import AddIoctlWindow
+from view.addmmapwindow import AddMmapWindow
+from view.addwritewindow import AddWriteWindow
 from android import utils
 import tkinter as tk
 from tkinter import filedialog
@@ -37,27 +40,33 @@ class MainWindow:
         self.chosen_methods = [IntVar(), IntVar(), IntVar()]
         self.pane_title_font = 'Helvetica 11 bold'
 
-        menubar = tk.Menu(self.window)
-        project_menu = tk.Menu(menubar, tearoff=0)
+        self.menubar = tk.Menu(self.window)
+        project_menu = tk.Menu(self.menubar, tearoff=0)
         project_menu.add_command(label="Nowy", command=self.new_project)
         project_menu.add_command(label="Załaduj", command=self.load_project_file)
         project_menu.add_command(label="Zapisz", command=self.save_project_file)
         project_menu.add_command(label="Zapisz jako..", command=self.save_project_file_as)
 
-        corpus_menu = tk.Menu(menubar, tearoff=0)
-        corpus_menu.add_command(label="Dodaj")
+        self.corpus_menu = tk.Menu(self.menubar, tearoff=0)
+        add_case_menu = tk.Menu(self.menubar, tearoff=0)
+        add_case_menu.add_command(label='ioctl', command=self.add_ioctl)
+        add_case_menu.add_command(label='mmap', command=self.add_mmap)
+        add_case_menu.add_command(label='write', command=self.add_write)
+        self.corpus_menu.add_cascade(label="Dodaj", menu=add_case_menu)
 
-        settings_menu = tk.Menu(menubar, tearoff=0)
-        settings_menu.add_command(label="Ogólne")
-        settings_menu.add_command(label="Mutator")
+        self.settings_menu = tk.Menu(self.menubar, tearoff=0)
+        #self.settings_menu.add_command(label="Ogólne")
+        self.settings_menu.add_command(label="Mutator")
+        self.settings_menu.entryconfig('Mutator', state='disabled')
 
-        menubar.add_cascade(label="Projekt", menu=project_menu)
-        menubar.add_cascade(label="Korpus", menu=corpus_menu)
-        menubar.add_cascade(label="Generator")
-        menubar.add_cascade(label="Ustawienia", menu=settings_menu)
-        menubar.add_cascade(label="Pomoc")
-
-        self.window.config(menu=menubar)
+        self.menubar.add_cascade(label="Projekt", menu=project_menu)
+        self.menubar.add_cascade(label="Korpus", menu=self.corpus_menu)
+        self.menubar.add_cascade(label="Generator")
+        self.menubar.add_cascade(label="Ustawienia", menu=self.settings_menu)
+        self.menubar.add_cascade(label="Pomoc")
+        self.menubar.entryconfig('Korpus', state='disabled')
+        self.menubar.entryconfig('Generator', state='disabled')
+        self.window.config(menu=self.menubar)
         #self.window.columnconfigure(0, weight=1)
         self.window.columnconfigure(1, weight=1)
         self.window.rowconfigure(0, weight=2)
@@ -69,6 +78,9 @@ class MainWindow:
             self.initialize_window()
 
     def initialize_window(self):
+        self.menubar.entryconfig('Korpus', state='normal')
+        self.menubar.entryconfig('Generator', state='normal')
+        self.settings_menu.entryconfig('Mutator', state='normal')
         project_frame = Frame(self.window)
         log_frame = Frame(self.window, relief=tk.SUNKEN)
         project_frame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
@@ -190,3 +202,12 @@ class MainWindow:
             options['title'] = 'Zapisz projekt jako..'
             filename = filedialog.asksaveasfilename(**options)
             self.model.save_project(filename)
+
+    def add_ioctl(self):
+        AddIoctlWindow(self, self.model)
+
+    def add_write(self):
+        AddWriteWindow(self, self.model)
+
+    def add_mmap(self):
+        AddMmapWindow(self, self.model)

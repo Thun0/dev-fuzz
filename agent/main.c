@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <android/log.h>
+#include <errno.h>
 
 #define MAX_MSG_LEN 4096
 
@@ -77,7 +78,7 @@ void start_receiver(int sock)
             }
             else
             {
-                printf("ERR: Failed to open driver\n");
+                printf("ERR: Failed to open driver (%d): %s\n", errno, strerror(errno));
             }
         }
         else if(msg_type == MSG_IOCTL)
@@ -100,7 +101,8 @@ void start_receiver(int sock)
             printf("Exectuing ioctl on %s..\n", driver_path);
 
             int ret = ioctl(driver_fd, request, args);
-            printf("IOCTL ret code: %d", ret);
+            printf("IOCTL ret code: %d\n", ret);
+            printf("%d: %s\n", errno, strerror(errno));
             free(args);
         }
         else if(msg_type == MSG_WRITE)

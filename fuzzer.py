@@ -4,6 +4,7 @@ from sender.message import Message, MessageType
 from mutator.mutator import Mutator
 import time
 import random
+import struct
 
 
 class Fuzzer:
@@ -31,10 +32,19 @@ class Fuzzer:
         data = msg.pack()
         s.send(data)
         while self.running:
-            corpus_input = self.corpus.get_random_input(random.randrange(0, len(self.methods)))
-            print(corpus_input)
-            pass #TODO: Fuzzing goes here
-            time.sleep(2)
+            method = self.methods[random.randrange(0, len(self.methods))]
+            corpus_input = self.corpus.get_random_input(method)
+            if method is 'ioctl':
+                ioctl_req = struct.unpack('q', corpus_input[:8])[0]
+                mutator = Mutator(corpus_input[8:])
+                mutator.flip_n_bits(random.randint(1, 8*4))
+                msg = Message(MessageType.IOCTL, int(ioctl_req), mutator.data)
+                data = msg.pack()
+                s.send(data)
+            elif method is 'write':
+                pass
+            elif method is 'mmap':
+                pass
         s.close()
         print('socket closed - {}', self.port)
         print(t.is_alive())

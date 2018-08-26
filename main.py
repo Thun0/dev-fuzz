@@ -3,7 +3,7 @@ import settings
 from project import Project
 from view.mainwindow import MainWindow
 from model import Model
-
+import struct
 
 def menu():
     while True:
@@ -79,6 +79,9 @@ def load_project():
 
 
 if __name__ == "__main__":
+    f = open('/home/thun/aac', mode='wb')
+    f.write(struct.pack('qi', 1074028900, 0))
+    f.close()
     model = Model()
     main_window = MainWindow(model)
     model.view = main_window
