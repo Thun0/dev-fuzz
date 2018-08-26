@@ -16,7 +16,12 @@ class AddWriteWindow:
         self.window.title('Lista sterowników')
         self.window.geometry('600x400')
         Button(self.window, text='Dodaj', command=self.add_case).grid()
+        self.window.transient(master=parent.window)
+        self.window.grab_set()
 
     def add_case(self):
         pass
 
+    def destroy(self):
+        self.window.grab_release()
+        self.window.destroy()

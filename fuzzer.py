@@ -9,13 +9,14 @@ import struct
 
 class Fuzzer:
 
-    def __init__(self, dev, port, path, corpus, methods):
+    def __init__(self, dev, port, path, corpus, methods, mutations):
         self.device = dev.device
         self.port = port
         self.running = False
         self.devpath = path
         self.corpus = corpus
         self.methods = methods
+        self.mutations = mutations
         print('Fuzzuje {} metody'.format(len(methods)))
 
     def run(self):

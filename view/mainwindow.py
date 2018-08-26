@@ -1,9 +1,10 @@
 from view.newprojectwindow import NewProjectWindow
 from view.driverswindow import DriversWindow
-from view.progresswindow import ProgressWindow
 from view.addioctlwindow import AddIoctlWindow
 from view.addmmapwindow import AddMmapWindow
 from view.addwritewindow import AddWriteWindow
+from view.generatorwindow import GeneratorWindow
+from view.mutatorwindow import MutatorWindow
 from android import utils
 import tkinter as tk
 from tkinter import filedialog
@@ -22,7 +23,7 @@ class MainWindow:
 
     devices_lb = None
 
-    def __init__(self, model):
+    def __init__(self, window, model):
         width = 800
         height = 600
         self.log_txt = None
@@ -32,7 +33,7 @@ class MainWindow:
         self.end_minute_entry = None
         self.devpath_label = None
         self.model = model
-        self.window = tk.Tk()
+        self.window = window
         self.data_source = IntVar()
         self.end_cause = IntVar()
         self.window.title('ADFuzz')
@@ -56,14 +57,14 @@ class MainWindow:
 
         self.settings_menu = tk.Menu(self.menubar, tearoff=0)
         #self.settings_menu.add_command(label="Ogólne")
-        self.settings_menu.add_command(label="Mutator")
+        self.settings_menu.add_command(label="Mutator", command=self.mutator_window)
         self.settings_menu.entryconfig('Mutator', state='disabled')
 
         self.menubar.add_cascade(label="Projekt", menu=project_menu)
         self.menubar.add_cascade(label="Korpus", menu=self.corpus_menu)
-        self.menubar.add_cascade(label="Generator")
+        self.menubar.add_command(label="Generator", command=self.generator_window)
         self.menubar.add_cascade(label="Ustawienia", menu=self.settings_menu)
-        self.menubar.add_cascade(label="Pomoc")
+        self.menubar.add_command(label="Pomoc")
         self.menubar.entryconfig('Korpus', state='disabled')
         self.menubar.entryconfig('Generator', state='disabled')
         self.window.config(menu=self.menubar)
@@ -97,6 +98,12 @@ class MainWindow:
 
     def refresh_device_list(self):
         pass
+
+    def generator_window(self):
+        GeneratorWindow(self, self.model)
+
+    def mutator_window(self):
+        MutatorWindow(self, self.model)
 
     def initialize_project_frame(self, project_frame):
         Label(project_frame, text='Projekt: {}'.format(self.model.project.name), font='Helvetica 16 bold').grid(sticky=tk.NW, columnspan=4, pady=10)

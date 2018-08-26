@@ -4,6 +4,8 @@ from project import Project
 from view.mainwindow import MainWindow
 from model import Model
 import struct
+import tkinter as tk
+
 
 def menu():
     while True:
@@ -82,7 +84,8 @@ if __name__ == "__main__":
     f = open('/home/thun/aac', mode='wb')
     f.write(struct.pack('qi', 1074028900, 0))
     f.close()
+    w = tk.Tk()
     model = Model()
-    main_window = MainWindow(model)
+    main_window = MainWindow(w, model)
     model.view = main_window
     main_window.run()

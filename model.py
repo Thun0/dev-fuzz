@@ -1,5 +1,4 @@
 from project import Project
-from corpus.corpus import Corpus
 from pathlib import Path
 from android import utils
 import threading
@@ -7,6 +6,7 @@ import settings
 from fuzzer import Fuzzer
 from corpus.corpus import Corpus
 import random
+from tkinter import IntVar
 
 
 class Model:
@@ -21,6 +21,12 @@ class Model:
         self.devices = []
         self.fuzzers = []
         self.threads = []
+        self.mutations = [['Zamiana bitów', IntVar()],
+                          ['Zamiana bajtów', IntVar()],
+                          ['Usuwanie fragmentów', IntVar()],
+                          ['Dodawanie danych', IntVar()]]
+        for m in self.mutations:
+            m[1].set(1)
         self.get_devices()
 
     def install_busybox(self):
@@ -66,15 +72,19 @@ class Model:
 
     def start_run(self, chosen_devices, methods):
         print(methods)
-        #port = settings.config['devices_start_port']
-        port = 1337
+        port = settings.config['devices_start_port']
         self.view.log('Instaluję agenta na urządzeniach ({})...\n'.format(len(chosen_devices)))
         for idx in chosen_devices:
             self.devices[idx].device.push(settings.config['agent_path'], '/data/local/tmp/agent', 0o755)
-            self.fuzzers.append(Fuzzer(self.devices[idx], port, self.project.devpath, self.corpus, methods))
+            #TODO: add devices.shell run agent
+            mutations = [x[1].get() for x in self.mutations]
+            self.fuzzers.append(Fuzzer(self.devices[idx], port, self.project.devpath, self.corpus, methods, mutations))
             port += 1
         for f in self.fuzzers:
             t = threading.Thread(target=f.run, daemon=True)
             self.threads.append(t)
             t.start()
         self.view.log('Rozpoczęto testowanie!\n')
+
+    def get_mutations(self):
+        return self.mutations
