@@ -97,7 +97,9 @@ class MainWindow:
         devices_frame.grid(row=0, column=1, sticky=tk.N+tk.E+tk.S+tk.W, padx=10)
 
     def refresh_device_list(self):
-        pass
+        self.devices_lb.delete(0, tk.END)
+        for d in utils.get_devices():
+            self.devices_lb.insert(tk.END, d.name)
 
     def generator_window(self):
         GeneratorWindow(self, self.model)
@@ -158,7 +160,7 @@ class MainWindow:
         for d in utils.get_devices():
             self.devices_lb.insert(tk.END, d.name)
         self.devices_lb.grid(row=1, sticky=tk.N+tk.E+tk.S+tk.W)
-        Button(devices_frame, text='Odśwież').grid(row=2)
+        Button(devices_frame, text='Odśwież', command=self.refresh_device_list).grid(row=2)
 
     def refresh_driver(self):
         self.devpath_label.config(text='Sterownik: {}'.format(self.model.project.devpath))
